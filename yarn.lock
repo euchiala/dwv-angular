@@ -266,9 +266,9 @@
   dependencies:
     tslib "^2.3.0"
 
-"@angular/language-service@^16.2.12":
-  version "16.2.12"
-  resolved "https://registry.npmjs.org/@angular/language-service/-/language-service-16.2.12.tgz"
+"@angular/language-service@^17.2.2":
+  version "17.2.2"
+  resolved "https://registry.yarnpkg.com/@angular/language-service/-/language-service-17.2.2.tgz#17e3f09d8fd29fc777c99b04eb58990ac496a995"
 
 "@angular/material@^16.2.11":
   version "16.2.11"
