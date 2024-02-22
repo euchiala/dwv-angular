@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { VERSION } from '@angular/core';
 import {
   App,
@@ -11,6 +11,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { TagsDialogComponent } from './tags-dialog.component';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
+import { ViewChild, ElementRef } from '@angular/core';
 
 // gui overrides
 
@@ -28,12 +29,14 @@ decoderScripts.rle = 'assets/dwv/decoders/dwv/decode-rle.js';
 })
 
 export class DwvComponent implements OnInit {
+  @ViewChild('magnifierCanvas', { static: true }) magnifierCanvasRef!: ElementRef<HTMLCanvasElement>;
+
   public versions: any;
   public tools = {
-      Scroll: new ToolConfig(),
-      ZoomAndPan: new ToolConfig(),
-      WindowLevel: new ToolConfig(),
-      Draw: new ToolConfig(['Ruler']),
+    Scroll: new ToolConfig(),
+    ZoomAndPan: new ToolConfig(),
+    WindowLevel: new ToolConfig(),
+    Draw: new ToolConfig(['Ruler']),
   };
   public toolNames: string[] = Object.keys(this.tools);
   public selectedTool = 'Select Tool';
@@ -51,22 +54,19 @@ export class DwvComponent implements OnInit {
   private borderClassName = 'dropBoxBorder';
   private hoverClassName = 'hover';
 
-  @ViewChild('canvas') canvasRef!: ElementRef<HTMLCanvasElement>;
-  private canvas!: HTMLCanvasElement;
   constructor(public dialog: MatDialog) {
     this.versions = {
       dwv: getDwvVersion(),
       angular: VERSION.full
     };
   }
-  private zoomLevel: number = 1;
 
   ngOnInit() {
     // create app
     this.dwvApp = new App();
     // initialise app
     const viewConfig0 = new ViewConfig('layerGroup0');
-    const viewConfigs = {'*': [viewConfig0]};
+    const viewConfigs = { '*': [viewConfig0] };
     const options = new AppOptions(viewConfigs);
     options.tools = this.tools;
     this.dwvApp.init(options);
@@ -133,7 +133,7 @@ export class DwvComponent implements OnInit {
 
     // handle key events
     this.dwvApp.addEventListener('keydown', (event: KeyboardEvent) => {
-        this.dwvApp.defaultOnKeydown(event);
+      this.dwvApp.defaultOnKeydown(event);
     });
     // handle window resize
     window.addEventListener('resize', this.dwvApp.onResize);
@@ -143,7 +143,88 @@ export class DwvComponent implements OnInit {
 
     // possible load from location
     this.dwvApp.loadFromUri(window.location.href);
+
   }
+
+  toggleMagnifier() {
+    const magnifierCanvas = this.magnifierCanvasRef.nativeElement;
+    const magnifierContext = magnifierCanvas.getContext('2d');
+
+    if (!magnifierContext) {
+      console.error('Failed to get 2D context for magnifier canvas.');
+      return;
+    }
+
+    const mainCanvas = document.getElementById('layerGroup0-layer-0')?.querySelector('canvas');
+
+    if (!mainCanvas) {
+      console.error('Main canvas element not found.');
+      return;
+    }
+
+    if (magnifierCanvas.style.display === 'none') {
+      magnifierCanvas.style.display = 'block';
+      magnifierCanvas.style.position = 'relative';
+      this.initMagnifier();
+    } else {
+      magnifierCanvas.style.display = 'none';
+    }
+  }
+
+  private initMagnifier() {
+    const magnifierCanvas = this.magnifierCanvasRef.nativeElement;
+    const magnifierContext = magnifierCanvas.getContext('2d');
+
+    if (!magnifierContext) {
+      console.error('Failed to get 2D context for magnifier canvas.');
+      return;
+    }
+
+    const mainCanvas = document.getElementById('layerGroup0-layer-0')?.querySelector('canvas');
+
+    if (!mainCanvas) {
+      console.error('Main canvas element not found.');
+      return;
+    }
+
+    mainCanvas.addEventListener('mousemove', (event: MouseEvent) => {
+      const rect = magnifierCanvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+
+      const magnifierSize = 100;
+      const magnifierX = mouseX - magnifierSize / 2;
+      const magnifierY = mouseY - magnifierSize / 2;
+
+      magnifierContext.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
+
+      magnifierContext.drawImage(
+        mainCanvas,
+        magnifierX,
+        magnifierY,
+        magnifierSize,
+        magnifierSize,
+        0,
+        0,
+        magnifierCanvas.width,
+        magnifierCanvas.height
+      );
+
+      magnifierContext.beginPath();
+      magnifierContext.arc(
+        magnifierCanvas.width / 2,
+        magnifierCanvas.height / 2,
+        magnifierSize / 2,
+        0,
+        Math.PI * 2
+      );
+      magnifierContext.strokeStyle = 'white';
+      magnifierContext.lineWidth = 2;
+      magnifierContext.stroke();
+      magnifierContext.closePath();
+    });
+  }
+
 
   /**
    * Get the icon of a tool.
@@ -170,7 +251,7 @@ export class DwvComponent implements OnInit {
    * @param tool The new tool name.
    */
   onChangeTool = (tool: string) => {
-    if ( this.dwvApp ) {
+    if (this.dwvApp) {
       this.selectedTool = tool;
       this.dwvApp.setTool(tool);
       if (tool === 'Draw' &&
@@ -227,7 +308,7 @@ export class DwvComponent implements OnInit {
     // update data view config
     const viewConfig0 = new ViewConfig('layerGroup0');
     viewConfig0.orientation = this.orientation;
-    const viewConfigs = {'*': [viewConfig0]};
+    const viewConfigs = { '*': [viewConfig0] };
     this.dwvApp.setDataViewConfigs(viewConfigs);
     // render data
     for (let i = 0; i < this.dwvApp.getNumberOfLoadedData(); ++i) {
@@ -240,8 +321,8 @@ export class DwvComponent implements OnInit {
    * @param shape The new shape name.
    */
   private onChangeShape = (shape: string) => {
-    if ( this.dwvApp && this.selectedTool === 'Draw') {
-      this.dwvApp.setToolFeatures({shapeName: shape});
+    if (this.dwvApp && this.selectedTool === 'Draw') {
+      this.dwvApp.setToolFeatures({ shapeName: shape });
     }
   }
 
@@ -249,7 +330,7 @@ export class DwvComponent implements OnInit {
    * Handle a reset event.
    */
   onReset = () => {
-    if ( this.dwvApp ) {
+    if (this.dwvApp) {
       this.dwvApp.resetDisplay();
     }
   }
@@ -296,7 +377,7 @@ export class DwvComponent implements OnInit {
     // update box border
     const box = document.getElementById(this.dropboxDivId);
     if (box && box.className.indexOf(this.hoverClassName) === -1) {
-        box.className += ' ' + this.hoverClassName;
+      box.className += ' ' + this.hoverClassName;
     }
   }
 
@@ -309,36 +390,9 @@ export class DwvComponent implements OnInit {
     // update box border
     const box = document.getElementById(this.dropboxDivId);
     if (box && box.className.indexOf(this.hoverClassName) !== -1) {
-        box.className = box.className.replace(' ' + this.hoverClassName, '');
+      box.className = box.className.replace(' ' + this.hoverClassName, '');
     }
   }
-  onZoomIn() {
-    if (this.dataLoaded) {
-      this.zoomLevel *= 1.1; // Adjust the zoom increment as needed
-      this.updateCanvasTransform();
-    }
-  }
-
-  // Function to handle custom zoom out
-  onZoomOut() {
-    if (this.dataLoaded) {
-      this.zoomLevel *= 0.9; // Adjust the zoom decrement as needed
-      this.updateCanvasTransform();
-    }
-  }
-
-  // Update canvas transformation based on the current zoom level
-  private updateCanvasTransform() {
-    if (this.canvas) {
-      const context = this.canvas.getContext('2d');
-      if (context) {
-        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        context.setTransform(this.zoomLevel, 0, 0, this.zoomLevel, 0, 0);
-        // Render your image or content on the canvas here
-      }
-    }
-  }
-
 
   /**
    * Handle a drop event.
