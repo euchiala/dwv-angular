@@ -36,9 +36,9 @@ export class DwvComponent implements OnInit {
     Scroll: new ToolConfig(),
     ZoomAndPan: new ToolConfig(),
     WindowLevel: new ToolConfig(),
-    Draw: new ToolConfig(['Ruler']),
+    Draw: new ToolConfig(['Ruler', 'Circle', 'Rectangle']),
   };
-  public toolNames: string[] = Object.keys(this.tools);
+  public toolNames: string[] = [];
   public selectedTool = 'Select Tool';
   public loadProgress = 0;
   public dataLoaded = false;
@@ -55,6 +55,14 @@ export class DwvComponent implements OnInit {
   private hoverClassName = 'hover';
 
   constructor(public dialog: MatDialog) {
+    this.toolNames = Object.keys(this.tools)
+      // Filter out 'Draw'
+      .filter(tool => tool !== 'Draw');
+
+    // Add additional tools specified in Draw tool configuration
+    if (this.tools.Draw && this.tools.Draw.options) {
+      this.toolNames.push(...this.tools.Draw.options);
+    }
     this.versions = {
       dwv: getDwvVersion(),
       angular: VERSION.full
@@ -240,8 +248,12 @@ export class DwvComponent implements OnInit {
       res = 'search';
     } else if (tool === 'WindowLevel') {
       res = 'contrast';
-    } else if (tool === 'Draw') {
+    } else if (tool === 'Ruler') {
       res = 'straighten';
+    } else if (tool === 'Circle') {
+      res = 'circle';
+    } else if (tool === 'Rectangle') {
+      res = 'crop_landscape';
     }
     return res;
   }
@@ -253,10 +265,12 @@ export class DwvComponent implements OnInit {
   onChangeTool = (tool: string) => {
     if (this.dwvApp) {
       this.selectedTool = tool;
-      this.dwvApp.setTool(tool);
-      if (tool === 'Draw' &&
-        typeof this.tools.Draw.options !== 'undefined') {
-        this.onChangeShape(this.tools.Draw.options[0]);
+      if ((tool === 'Ruler' || tool === 'Circle' || tool === 'Rectangle') &&
+      typeof this.tools.Draw.options !== 'undefined') {
+        this.dwvApp.setTool('Draw');
+        this.onChangeShape(tool);
+      } else {
+        this.dwvApp.setTool(tool);
       }
     }
   }
@@ -321,7 +335,7 @@ export class DwvComponent implements OnInit {
    * @param shape The new shape name.
    */
   private onChangeShape = (shape: string) => {
-    if (this.dwvApp && this.selectedTool === 'Draw') {
+    if (this.dwvApp && (this.selectedTool === 'Ruler' || this.selectedTool === 'Circle' || this.selectedTool === 'Rectangle')) {
       this.dwvApp.setToolFeatures({ shapeName: shape });
     }
   }
