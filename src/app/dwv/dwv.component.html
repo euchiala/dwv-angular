@@ -2,11 +2,8 @@
   <mat-progress-bar mode="determinate" value="{{ loadProgress }}"></mat-progress-bar>
   <div class="button-row">
     <mat-button-toggle-group name="tool" [disabled]="!dataLoaded">
-      <mat-button-toggle value="{{ tool }}" color="primary"
-        *ngFor="let tool of toolNames"
-        title="{{ tool }}"
-        (click)="onChangeTool(tool)"
-        [disabled]="!dataLoaded || !canRunTool(tool)">
+      <mat-button-toggle value="{{ tool }}" color="primary" *ngFor="let tool of toolNames" title="{{ tool }}"
+        (click)="onChangeTool(tool)" [disabled]="!dataLoaded || !canRunTool(tool)">
         <mat-icon>{{ getToolIcon(tool) }}</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
@@ -14,43 +11,38 @@
     <button mat-raised-button color="primary" (click)="toggleMagnifier()">Toggle Magnifier</button>
     <canvas #magnifierCanvas style="display: none;"></canvas>
 
-    <mat-button-toggle-group name="reset" [disabled]="!dataLoaded"
-      (change)="onSingleToogleChange($event)">
-      <mat-button-toggle color="primary"
-        title="Reset"
-        (click)="onReset()">
+    <mat-button-toggle-group name="reset" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
+      <mat-button-toggle color="primary" title="Reset" (click)="onReset()">
         <mat-icon>refresh</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
 
-    <mat-button-toggle-group name="reset" [disabled]="!dataLoaded"
-      (change)="onSingleToogleChange($event)">
-      <mat-button-toggle color="primary"
-        title="Toggle Orientation"
-        (click)="toggleOrientation()">
+    <mat-button-toggle-group name="reset" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
+      <mat-button-toggle color="primary" title="Toggle Orientation" (click)="toggleOrientation()">
         <mat-icon>cameraswitch</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
 
-    <mat-button-toggle-group name="tags" [disabled]="!dataLoaded"
-      (change)="onSingleToogleChange($event)">
-      <mat-button-toggle color="primary"
-        title="Tags"
-        (click)="openTagsDialog()">
+    <mat-button-toggle-group name="tags" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
+      <mat-button-toggle color="primary" title="Tags" (click)="openTagsDialog()">
         <mat-icon>library_books</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
-</div>
+    <div class="select-box" *ngIf="colours">
+      <select id="colourMapSelect" (change)="onColourMapChange($event.target.value)">
+        <option value="plain">Plain</option>
+        <option value="invPlain">Invplain</option>
+        <option value="rainbow">Rainbow</option>
+        <option value="hot">Hot</option>
+        <option value="hot_iron">Hot Iron</option>
+        <option value="pet">Pet</option>
+        <option value="hot_metal_blue">Hot Metal Blue</option>
+        <option value="pet_20step">Pet 20 steps</option>
+      </select>
+
+    </div>
+  </div>
   <div id="layerGroup0" class="layerGroup">
     <div id="dropBox"></div>
-  </div>
-  <div class="legend mat-small">
-    <p>Powered by
-    <a href="https://github.com/ivmartel/dwv">dwv</a>
-    {{ versions.dwv }}
-    and
-    <a href="https://github.com/angular/angular">Angular</a>
-    {{ versions.angular }}
-    </p>
   </div>
 </div>

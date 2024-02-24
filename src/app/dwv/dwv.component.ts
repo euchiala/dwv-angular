@@ -36,12 +36,15 @@ export class DwvComponent implements OnInit {
     Scroll: new ToolConfig(),
     ZoomAndPan: new ToolConfig(),
     WindowLevel: new ToolConfig(),
+    ColourMap: new ToolConfig(),
     Draw: new ToolConfig(['Ruler', 'Circle', 'Rectangle']),
+    Filter: new ToolConfig(['Sharpen', 'Sobel'])
   };
   public toolNames: string[] = [];
   public selectedTool = 'Select Tool';
   public loadProgress = 0;
   public dataLoaded = false;
+  public colours = false;
 
   private dwvApp!: App;
   private metaData!: any;
@@ -248,14 +251,26 @@ export class DwvComponent implements OnInit {
       res = 'search';
     } else if (tool === 'WindowLevel') {
       res = 'contrast';
+    } else if (tool === 'ColourMap') {
+      res = 'palette';
     } else if (tool === 'Ruler') {
       res = 'straighten';
     } else if (tool === 'Circle') {
       res = 'circle';
     } else if (tool === 'Rectangle') {
       res = 'crop_landscape';
+    } else if (tool === 'Filter') {
+      res = 'filter_tilt_shift';
     }
     return res;
+  }
+
+  /**
+   * Handle a colour change event.
+   * @param colourMap The new colourMap name.
+   */
+  onColourMapChange(colourMap: string) {
+    this.dwvApp.setColourMap(colourMap);
   }
 
   /**
@@ -265,10 +280,16 @@ export class DwvComponent implements OnInit {
   onChangeTool = (tool: string) => {
     if (this.dwvApp) {
       this.selectedTool = tool;
+      this.colours = false;
       if ((tool === 'Ruler' || tool === 'Circle' || tool === 'Rectangle') &&
       typeof this.tools.Draw.options !== 'undefined') {
         this.dwvApp.setTool('Draw');
         this.onChangeShape(tool);
+      } else if (tool == 'Filter') {
+        this.dwvApp.setTool('Filter');
+        this.onChangeFilter('Sharpen')
+      }else if (tool == 'ColourMap') {
+        this.colours = true;
       } else {
         this.dwvApp.setTool(tool);
       }
@@ -337,6 +358,15 @@ export class DwvComponent implements OnInit {
   private onChangeShape = (shape: string) => {
     if (this.dwvApp && (this.selectedTool === 'Ruler' || this.selectedTool === 'Circle' || this.selectedTool === 'Rectangle')) {
       this.dwvApp.setToolFeatures({ shapeName: shape });
+    }
+  }
+  /**
+   * Handle a change filter name event.
+   * @param filterName The new filter name.
+   */
+  private onChangeFilter = (filterName: string) => {
+    if (this.dwvApp && (this.selectedTool === 'Filter' )) {
+      this.dwvApp.setToolFeatures({ filterName: filterName});
     }
   }
 
