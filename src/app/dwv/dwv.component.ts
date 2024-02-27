@@ -156,85 +156,68 @@ export class DwvComponent implements OnInit {
 
   }
 
-  toggleMagnifier() {
-    const magnifierCanvas = this.magnifierCanvasRef.nativeElement;
-    const magnifierContext = magnifierCanvas.getContext('2d');
 
-    if (!magnifierContext) {
-      console.error('Failed to get 2D context for magnifier canvas.');
-      return;
+  magnifyCanvas() {
+    let zoom = 3;
+    var canvas = document.getElementById('layerGroup0-layer-0')?.querySelector('canvas');
+    let glass: any;
+    let w: any;
+    let h: any;
+    let bw: any;
+    let ctx: any;
+
+    ctx = canvas?.getContext("2d");
+    /*create magnifier glass:*/
+    glass = document.createElement("DIV");
+    glass.setAttribute("class", "canvas-magnifier-glass");
+    /*insert magnifier glass:*/
+    canvas!.parentElement!.insertBefore(glass, canvas!);
+    /*set background properties for the magnifier glass:*/
+    glass.style.backgroundImage = "url('" + canvas!.toDataURL() + "')";
+    glass.style.backgroundRepeat = "no-repeat";
+    glass.style.backgroundSize = (canvas!.width * zoom) + "px " + (canvas!.height * zoom) + "px";
+    bw = 3;
+    w = glass.offsetWidth / 2;
+    h = glass.offsetHeight / 2;
+    /*execute a function when someone moves the magnifier glass over the canvas:*/
+    glass.addEventListener("mousemove", moveMagnifier);
+    canvas?.addEventListener("mousemove", moveMagnifier);
+    /*and also for touch screens:*/
+    glass.addEventListener("touchmove", moveMagnifier);
+    canvas?.addEventListener("touchmove", moveMagnifier);
+    function moveMagnifier(e: any) {
+      var pos, x, y;
+      /*prevent any other actions that may occur when moving over the canvas*/
+      e.preventDefault();
+      /*get the cursor's x and y positions:*/
+      pos = getCursorPos(e);
+      x = pos.x;
+      y = pos.y;
+      /*prevent the magnifier glass from being positioned outside the canvas:*/
+      if (x > canvas!.width - (w / zoom)) { x = canvas!.width - (w / zoom); }
+      if (x < w / zoom) { x = w / zoom; }
+      if (y > canvas!.height - (h / zoom)) { y = canvas!.height - (h / zoom); }
+      if (y < h / zoom) { y = h / zoom; }
+      /*set the position of the magnifier glass:*/
+      glass.style.left = (x - w) + "px";
+      glass.style.top = (y - h) + "px";
+      /*display what the magnifier glass "sees":*/
+      glass.style.backgroundPosition = "-" + ((x * zoom) - w + bw) + "px -" + ((y * zoom) - h + bw) + "px";
     }
-
-    const mainCanvas = document.getElementById('layerGroup0-layer-0')?.querySelector('canvas');
-
-    if (!mainCanvas) {
-      console.error('Main canvas element not found.');
-      return;
-    }
-
-    if (magnifierCanvas.style.display === 'none') {
-      magnifierCanvas.style.display = 'block';
-      magnifierCanvas.style.position = 'relative';
-      this.initMagnifier();
-    } else {
-      magnifierCanvas.style.display = 'none';
+    function getCursorPos(e: any) {
+      var a, x = 0, y = 0;
+      e = e || window.event;
+      /*get the x and y positions of the canvas:*/
+      a = canvas!.getBoundingClientRect();
+      /*calculate the cursor's x and y coordinates, relative to the canvas:*/
+      x = e.pageX - a.left;
+      y = e.pageY - a.top;
+      /*consider any page scrolling:*/
+      x = x - window.pageXOffset;
+      y = y - window.pageYOffset;
+      return { x: x, y: y };
     }
   }
-
-  private initMagnifier() {
-    const magnifierCanvas = this.magnifierCanvasRef.nativeElement;
-    const magnifierContext = magnifierCanvas.getContext('2d');
-
-    if (!magnifierContext) {
-      console.error('Failed to get 2D context for magnifier canvas.');
-      return;
-    }
-
-    const mainCanvas = document.getElementById('layerGroup0-layer-0')?.querySelector('canvas');
-
-    if (!mainCanvas) {
-      console.error('Main canvas element not found.');
-      return;
-    }
-
-    mainCanvas.addEventListener('mousemove', (event: MouseEvent) => {
-      const rect = magnifierCanvas.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
-      const mouseY = event.clientY - rect.top;
-
-      const magnifierSize = 100;
-      const magnifierX = mouseX - magnifierSize / 2;
-      const magnifierY = mouseY - magnifierSize / 2;
-
-      magnifierContext.clearRect(0, 0, magnifierCanvas.width, magnifierCanvas.height);
-
-      magnifierContext.drawImage(
-        mainCanvas,
-        magnifierX,
-        magnifierY,
-        magnifierSize,
-        magnifierSize,
-        0,
-        0,
-        magnifierCanvas.width,
-        magnifierCanvas.height
-      );
-
-      magnifierContext.beginPath();
-      magnifierContext.arc(
-        magnifierCanvas.width / 2,
-        magnifierCanvas.height / 2,
-        magnifierSize / 2,
-        0,
-        Math.PI * 2
-      );
-      magnifierContext.strokeStyle = 'white';
-      magnifierContext.lineWidth = 2;
-      magnifierContext.stroke();
-      magnifierContext.closePath();
-    });
-  }
-
 
   /**
    * Get the icon of a tool.

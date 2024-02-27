@@ -4,11 +4,13 @@ $primary: map-get($dark-theme, primary);
 $accent: map-get($dark-theme, accent);
 
 #dwv {
-  height: 90%; }
+  height: 90%;
+}
 
 a {
   color: mat.get-color-from-palette($accent);
 }
+
 a:hover {
   color: mat.get-color-from-palette($primary);
 }
@@ -17,10 +19,12 @@ a:hover {
   text-align: center;
   padding: 5px;
 }
+
 #dwv .mat-button-toggle-group {
   align-items: center;
   margin: 0.2em;
 }
+
 #dwv .mat-button-toggle-checked {
   color: mat.get-color-from-palette($primary);
 }
@@ -39,6 +43,7 @@ a:hover {
   justify-content: center;
   height: 90%;
 }
+
 .layer {
   position: absolute;
   pointer-events: none;
@@ -47,9 +52,30 @@ a:hover {
 /* drag&drop */
 .dropBox {
   margin: auto;
-  text-align: center; vertical-align: middle;
-  width: 50%; height: 75%; }
+  text-align: center;
+  vertical-align: middle;
+  width: 50%;
+  height: 75%;
+}
+
 .dropBoxBorder {
-  border: 5px dashed mat.get-color-from-palette($primary, lighter); }
+  border: 5px dashed mat.get-color-from-palette($primary, lighter);
+}
+
 .dropBoxBorder.hover {
-  border: 5px dashed mat.get-color-from-palette($primary); }
+  border: 5px dashed mat.get-color-from-palette($primary);
+}
+
+.canvas-magnifier-container {
+  position: relative;
+}
+
+.canvas-magnifier-glass {
+  position: absolute;
+  border: 3px solid #000;
+  border-radius: 50%;
+  cursor: none;
+  /*Set the size of the magnifier glass:*/
+  width: 100px;
+  height: 100px;
+}

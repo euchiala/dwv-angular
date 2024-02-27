@@ -8,8 +8,9 @@
       </mat-button-toggle>
     </mat-button-toggle-group>
 
-    <button mat-raised-button color="primary" (click)="toggleMagnifier()">Toggle Magnifier</button>
-    <canvas #magnifierCanvas style="display: none;"></canvas>
+    <button mat-button color="primary" (click)="magnifyCanvas()">
+      <mat-icon>zoom_in</mat-icon>
+    </button>
 
     <mat-button-toggle-group name="reset" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
       <mat-button-toggle color="primary" title="Reset" (click)="onReset()">
