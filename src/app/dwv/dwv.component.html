@@ -8,13 +8,15 @@
       </mat-button-toggle>
     </mat-button-toggle-group>
 
-    <button mat-button color="primary" (click)="magnifyCanvas()">
-      <mat-icon>zoom_in</mat-icon>
-    </button>
+    <mat-button-toggle-group name="magnifier" [disabled]="!dataLoaded">
+      <mat-button-toggle color="primary" title="Magnifier" (click)="magnifyCanvas()">
+        <mat-icon>zoom_in</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
 
-    <mat-button-toggle-group name="reset" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
-      <mat-button-toggle color="primary" title="Reset" (click)="onReset()">
-        <mat-icon>refresh</mat-icon>
+    <mat-button-toggle-group name="data" [disabled]="!dataLoaded">
+      <mat-button-toggle color="primary" title="Save data" (click)="saveData()">
+        <mat-icon>save</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
 
@@ -29,6 +31,12 @@
         <mat-icon>library_books</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
+
+    <mat-button-toggle-group name="reset" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
+      <mat-button-toggle color="primary" title="Reset" (click)="onReset()">
+        <mat-icon>refresh</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
     <div class="select-box" *ngIf="colours">
       <select id="colourMapSelect" (change)="onColourMapChange($event.target.value)">
         <option value="plain">Plain</option>
@@ -40,7 +48,6 @@
         <option value="hot_metal_blue">Hot Metal Blue</option>
         <option value="pet_20step">Pet 20 steps</option>
       </select>
-
     </div>
   </div>
   <div id="layerGroup0" class="layerGroup">

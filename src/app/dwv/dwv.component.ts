@@ -3,6 +3,7 @@ import { VERSION } from '@angular/core';
 import {
   App,
   AppOptions,
+  DrawLayer,
   ViewConfig,
   ToolConfig,
   decoderScripts,
@@ -47,7 +48,7 @@ export class DwvComponent implements OnInit {
 
   private dwvApp!: App;
   private metaData!: any;
-
+  private draw?: DrawLayer;
   private orientation!: string;
 
   // drop box class name
@@ -55,6 +56,8 @@ export class DwvComponent implements OnInit {
   private dropboxClassName = 'dropBox';
   private borderClassName = 'dropBoxBorder';
   private hoverClassName = 'hover';
+
+  public jsonTest = '{"version": "0.5","window-center": 50,"window-width": 350,"position": [256,256,0],"scale": {"x": 1,"y": 1,"z": 1},"offset": {"x": 0,"y": 0,"z": 0},"drawings": {"attrs": {},"className": "Layer","children": [{"attrs": {"name": "position-group","id": "#2-0"},"className": "Group","children": [{"attrs": {"name": "ruler-group","id": "xl91ojvphr","draggable": true},"className": "Group","children": [{"attrs": {"x": 196.14503947879655,"y": 253.72646536412077,"scaleX": 1.8188277087033748,"scaleY": 1.8188277087033748,"name": "label"},"className": "Label","children": [{"attrs": {"fontSize": 10,"fontFamily": "Verdana","fill": "#ffff80","padding": 3,"shadowColor": "#000","shadowOffsetX": 0.25,"shadowOffsetY": 0.25,"name": "text","text": "88.36 mm"},"className": "Text"},{"attrs": {"fill": "#ffff80","opacity": 0.2,"width": 58.0361328125,"height": 16},"className": "Tag"}]},{"attrs": {"points": [120.79736260876041,185.34414339659344,125.65379192054672,176.60257063537807],"stroke": "#ffff80","strokeScaleEnabled": false,"name": "shape-tick0"},"className": "Line"},{"attrs": {"points": [251.7529576354034,258.0972517447285,256.6093869471897,249.35567898351314],"stroke": "#ffff80","strokeScaleEnabled": false,"name": "shape-tick1"},"className": "Line"},{"attrs": {"points": [123.22557726465357,180.97335701598578,254.18117229129655,253.72646536412077],"stroke": "#ffff80","strokeScaleEnabled": false,"name": "shape"},"className": "Line"},{"attrs": {"x": 123.22557726465357,"y": 180.97335701598578,"stroke": "#999","fill": "rgba(100,100,100,0.7","strokeScaleEnabled": false,"radiusX": 5.4564831261101245,"radiusY": 5.4564831261101245,"name": "anchor","id": "begin","dragOnTop": false,"draggable": true,"visible": false},"className": "Ellipse"},{"attrs": {"x": 254.18117229129655,"y": 253.72646536412077,"stroke": "#999","fill": "rgba(100,100,100,0.7","strokeScaleEnabled": false,"radiusX": 5.4564831261101245,"radiusY": 5.4564831261101245,"name": "anchor","id": "end","dragOnTop": false,"draggable": true,"visible": false},"className": "Ellipse"}]},{"attrs": {"name": "circle-group","id": "xukvng3tmz","draggable": true},"className": "Group","children": [{"attrs": {"x": 207.8010657193605,"y": 141.86856127886324,"scaleX": 1.8188277087033748,"scaleY": 1.8188277087033748,"name": "label"},"className": "Label","children": [{"attrs": {"fontSize": 10,"fontFamily": "Verdana","fill": "#ffff80","padding": 3,"shadowColor": "#000","shadowOffsetX": 0.25,"shadowOffsetY": 0.25,"name": "text","text": "9.192 cm²"},"className": "Text"},{"attrs": {"fill": "#ffff80","opacity": 0.2,"width": 58.939453125,"height": 16},"className": "Tag"}]},{"attrs": {"x": 207.8010657193605,"y": 141.86856127886324,"radius": 29,"stroke": "#ffff80","strokeScaleEnabled": false,"name": "shape"},"className": "Circle"}]},{"attrs": {"name": "rectangle-group","id": "msf98ei3o6k","draggable": true,"visible":true},"className": "Group","children": [{"attrs": {"x": 93.21492007104791,"y": 310.1101243339254,"scaleX": 1.8188277087033748,"scaleY": 1.8188277087033748,"name": "label"},"className": "Label","children": [{"attrs": {"fontSize": 10,"fontFamily": "Verdana","fill": "#ffff80","padding": 3,"shadowColor": "#000","shadowOffsetX": 0.25,"shadowOffsetY": 0.25,"name": "text","text": "13.24 cm²"},"className": "Text"},{"attrs": {"fill": "#ffff80","opacity": 0.2,"width": 58.939453125,"height": 16},"className": "Tag"}]},{"attrs": {"x": 93.21492007104791,"y": 264.639431616341,"width": 83.66607460035527,"height": 45.47069271758437,"stroke": "#ffff80","strokeScaleEnabled": false,"name": "shape"},"className": "Rect"}]}]}]},"drawingsDetails": {"xl91ojvphr": {"meta": {"textExpr": "{length}","quantification": {"length": {"value": 88.36320575710334,"unit": "mm"}}}},"xukvng3tmz": {"meta": {"textExpr": "{surface}","quantification": {"surface": {"value": 9.192207777935064,"unit": "cm²"},"min": {"value": -31,"unit": ""},"max": {"value": 134,"unit": ""},"mean": {"value": 70.31956027293404,"unit": ""},"stdDev": {"value": 16.254416915201556,"unit": ""}}}},"msf98ei3o6k": {"meta": {"textExpr": "{surface}","quantification": {"surface": {"value": 13.235944209055152,"unit": "cm²"},"min": {"value": 9,"unit": ""},"max": {"value": 122,"unit": ""},"mean": {"value": 61.63650793650794,"unit": ""},"stdDev": {"value": 15.346841547284253,"unit": ""}}}}}}';
 
   constructor(public dialog: MatDialog) {
     this.toolNames = Object.keys(this.tools)
@@ -153,10 +156,10 @@ export class DwvComponent implements OnInit {
 
     // possible load from location
     this.dwvApp.loadFromUri(window.location.href);
-
+    this.dwvApp.loadURLs([
+      window.location.href + 'assets/image-00000.dcm'
+     ]);
   }
-
-
   magnifyCanvas() {
     let zoom = 3;
     var canvas = document.getElementById('layerGroup0-layer-0')?.querySelector('canvas');
@@ -213,9 +216,16 @@ export class DwvComponent implements OnInit {
       x = e.pageX - a.left;
       y = e.pageY - a.top;
       /*consider any page scrolling:*/
-      x = x - window.pageXOffset;
-      y = y - window.pageYOffset;
+      x = x - window.scrollX;
+      y = y - window.scrollY;
       return { x: x, y: y };
+    }
+  }
+
+  disableMagnifier() {
+    var magnifierGlassDiv = document.getElementsByClassName('canvas-magnifier-glass')[0];
+    if (magnifierGlassDiv) {
+      magnifierGlassDiv.parentNode?.removeChild(magnifierGlassDiv);
     }
   }
 
@@ -230,7 +240,7 @@ export class DwvComponent implements OnInit {
     if (tool === 'Scroll') {
       res = 'menu';
     } else if (tool === 'ZoomAndPan') {
-      res = 'search';
+      res = 'open_with';
     } else if (tool === 'WindowLevel') {
       res = 'contrast';
     } else if (tool === 'ColourMap') {
@@ -259,6 +269,7 @@ export class DwvComponent implements OnInit {
    */
   onChangeTool = (tool: string) => {
     if (this.dwvApp) {
+      this.disableMagnifier();
       this.selectedTool = tool;
       this.colours = false;
       if ((tool === 'Ruler' || tool === 'Circle' || tool === 'Rectangle') &&
@@ -292,6 +303,22 @@ export class DwvComponent implements OnInit {
     return res;
   }
 
+  saveData() {
+    // var drawCanvas = document.getElementById('layerGroup0-layer-1')?.querySelector('canvas');
+
+    // // Get the 2D drawing context
+    // var drawContext = drawCanvas?.getContext('2d');
+
+    // // Get the drawing data
+    // var drawingData = drawContext?.getImageData(0, 0, drawCanvas!.width, drawCanvas!.height);
+    // var lineData = drawContext?.getLineDash();
+    // let element = document.getElementById("layerGroup0-layer-1") as HTMLDivElement;
+    // this.draw = new DrawLayer(element);
+    // this.draw.getDataIndex()
+    console.log(this.dwvApp.getJsonState());
+    this.dwvApp.applyJsonState(this.jsonTest);
+
+  }
   /**
    * For toogle button to not get selected.
    *
@@ -306,6 +333,7 @@ export class DwvComponent implements OnInit {
    * Toogle the viewer orientation.
    */
   toggleOrientation = () => {
+    this.disableMagnifier();
     if (typeof this.orientation !== 'undefined') {
       if (this.orientation === 'axial') {
         this.orientation = 'coronal';
@@ -344,7 +372,9 @@ export class DwvComponent implements OnInit {
    */
   onReset = () => {
     if (this.dwvApp) {
+      this.disableMagnifier();
       this.dwvApp.resetDisplay();
+
     }
   }
 
@@ -352,6 +382,7 @@ export class DwvComponent implements OnInit {
    * Open the DICOM tags dialog.
    */
   openTagsDialog = () => {
+    this.disableMagnifier();
     this.dialog.open(TagsDialogComponent,
       {
         data: {
