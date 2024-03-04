@@ -2386,9 +2386,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/jasmine@*", "@types/jasmine@~5.1.1":
-  version "5.1.1"
-  resolved "https://registry.npmjs.org/@types/jasmine/-/jasmine-5.1.1.tgz"
+"@types/jasmine@*", "@types/jasmine@~5.1.4":
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/@types/jasmine/-/jasmine-5.1.4.tgz#0de3f6ca753e10d1600ce1864ae42cfd47cf9924"
 
 "@types/jasminewd2@~2.0.12":
   version "2.0.12"
