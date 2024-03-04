@@ -1,42 +1,57 @@
 <div id="dwv">
   <mat-progress-bar mode="determinate" value="{{ loadProgress }}"></mat-progress-bar>
-  <div class="button-row">
-    <mat-button-toggle-group name="tool" [disabled]="!dataLoaded">
+
+  <div id="button-row" class="button-row">
+    <mat-button-toggle-group id="tool" name="tool" [disabled]="!dataLoaded">
       <mat-button-toggle value="{{ tool }}" color="primary" *ngFor="let tool of toolNames" title="{{ tool }}"
         (click)="onChangeTool(tool)" [disabled]="!dataLoaded || !canRunTool(tool)">
         <mat-icon>{{ getToolIcon(tool) }}</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
 
-    <mat-button-toggle-group name="magnifier" [disabled]="!dataLoaded">
+    <mat-button-toggle-group id="magnifier" name="magnifier" [disabled]="!dataLoaded">
       <mat-button-toggle color="primary" title="Magnifier" (click)="magnifyCanvas()">
         <mat-icon>zoom_in</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
 
-    <mat-button-toggle-group name="data" [disabled]="!dataLoaded">
+    <mat-button-toggle-group id="addComment" name="addComment" [disabled]="!dataLoaded">
+      <mat-button-toggle color="primary" title="Add Comment" (click)="showComment($event)">
+        <mat-icon>comment</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <mat-button-toggle-group id="data" name="data" [disabled]="!dataLoaded">
       <mat-button-toggle color="primary" title="Save data" (click)="saveData()">
         <mat-icon>save</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
 
-    <mat-button-toggle-group name="reset" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
+    <!-- <mat-button-toggle-group name="reset" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
       <mat-button-toggle color="primary" title="Toggle Orientation" (click)="toggleOrientation()">
         <mat-icon>cameraswitch</mat-icon>
       </mat-button-toggle>
-    </mat-button-toggle-group>
+    </mat-button-toggle-group> -->
 
-    <mat-button-toggle-group name="tags" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
+    <mat-button-toggle-group id="tags" name="tags" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
       <mat-button-toggle color="primary" title="Tags" (click)="openTagsDialog()">
         <mat-icon>library_books</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
 
-    <mat-button-toggle-group name="reset" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
+    <mat-button-toggle-group id="action-tool" name="action-tool" [disabled]="!dataLoaded">
+      <mat-button-toggle value="{{ tool }}" color="primary" *ngFor="let tool of actionTools" title="{{ tool }}"
+        (click)="onChangeActionTool(tool)" [disabled]="!dataLoaded || !canRunTool(tool)">
+        <mat-icon>{{tool}}</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <mat-button-toggle-group id="reset" name="reset" [disabled]="!dataLoaded" (change)="onSingleToogleChange($event)">
       <mat-button-toggle color="primary" title="Reset" (click)="onReset()">
         <mat-icon>refresh</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
+
     <div class="select-box" *ngIf="colours">
       <select id="colourMapSelect" (change)="onColourMapChange($event.target.value)">
         <option value="plain">Plain</option>
@@ -51,6 +66,26 @@
     </div>
   </div>
   <div id="layerGroup0" class="layerGroup">
+    <mat-tab-group>
+      <mat-tab label="Drawings">
+        <table id="drawings-table">
+        </table>
+      </mat-tab>
+      <mat-tab label="Comments"> Content 2 </mat-tab>
+    </mat-tab-group>
     <div id="dropBox"></div>
+    <form class="example-form">
+      <p>
+        <mat-form-field class="example-full-width">
+          <mat-label>Final Report</mat-label>
+          <textarea matInput></textarea>
+        </mat-form-field>
+      </p>
+    </form>
+
+
+    <!-- Copyright 2024 Google LLC. All Rights Reserved.
+        Use of this source code is governed by an MIT-style license that
+        can be found in the LICENSE file at https://angular.io/license -->
   </div>
 </div>

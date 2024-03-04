@@ -33,6 +33,7 @@ export class DwvComponent implements OnInit {
   @ViewChild('magnifierCanvas', { static: true }) magnifierCanvasRef!: ElementRef<HTMLCanvasElement>;
 
   public versions: any;
+  public drawingObject: any;
   public tools = {
     Scroll: new ToolConfig(),
     ZoomAndPan: new ToolConfig(),
@@ -40,6 +41,7 @@ export class DwvComponent implements OnInit {
     ColourMap: new ToolConfig(),
     Draw: new ToolConfig(['Ruler', 'Circle', 'Rectangle'])
   };
+  public actionTools: string[] = ['undo', 'redo'];
   public toolNames: string[] = [];
   public selectedTool = 'Select Tool';
   public loadProgress = 0;
@@ -101,17 +103,17 @@ export class DwvComponent implements OnInit {
     this.dwvApp.addEventListener('loadprogress', (event: ProgressEvent) => {
       this.loadProgress = event.loaded;
     });
-    this.dwvApp.addEventListener('renderend', (/*event*/) => {
-      if (isFirstRender) {
-        isFirstRender = false;
-        // available tools
-        let selectedTool = 'ZoomAndPan';
-        if (this.dwvApp.canScroll()) {
-          selectedTool = 'Scroll';
-        }
-        this.onChangeTool(selectedTool);
-      }
-    });
+    // this.dwvApp.addEventListener('renderend', (/*event*/) => {
+    //   if (isFirstRender) {
+    //     isFirstRender = false;
+    //     // available tools
+    //     let selectedTool = 'ZoomAndPan';
+    //     if (this.dwvApp.canScroll()) {
+    //       selectedTool = 'Scroll';
+    //     }
+    //     this.onChangeTool(selectedTool);
+    //   }
+    // });
     this.dwvApp.addEventListener('load', (event: any) => {
       // set dicom tags
       this.metaData = this.dwvApp.getMetaData(event.loadid);
@@ -158,9 +160,62 @@ export class DwvComponent implements OnInit {
     this.dwvApp.loadFromUri(window.location.href);
     this.dwvApp.loadURLs([
       window.location.href + 'assets/image-00000.dcm'
-     ]);
+    ]);
   }
+  showComment(e: any) {
+    var canvas = document.getElementById('layerGroup0-layer-0')?.querySelector('canvas');
+    var ctx = canvas!.getContext('2d');
+    var annotations: any[] = [];
+
+    canvas!.addEventListener('click', (e: any) => { handleClick(e, e.clientX, e.clientY) });
+
+    function handleClick(event: any, clientX: any, clientY: any) {
+      var rect = canvas!.getBoundingClientRect();
+      var scaleX = canvas!.width / rect.width;
+      var scaleY = canvas!.height / rect.height;
+      var x = (clientX) * scaleX;
+      var y = (clientY) * scaleY;
+      createInput(x, y);
+    }
+
+    function createInput(x: any, y: any) {
+      var input = document.createElement('textarea');
+      input.style.position = 'absolute';
+      input.style.left = x + 'px';
+      input.style.top = y + 'px';
+      document.body.appendChild(input);
+      annotations.push({ x: x, y: y, input: input });
+      canvas!.removeEventListener('click', () => { console.log('event removed') });
+
+    }
+
+    // Function to redraw annotations when canvas is resized
+    function redrawAnnotations(originalCanvasWidth: any, originalCanvasHeight: any) {
+      var newCanvasWidth = canvas!.width;
+      var newCanvasHeight = canvas!.height;
+      var widthRatio = newCanvasWidth / originalCanvasWidth;
+      var heightRatio = newCanvasHeight / originalCanvasHeight;
+
+      annotations.forEach(annotation => {
+        var rect = canvas!.getBoundingClientRect();
+        var scaleX = canvas!.width / rect.width;
+        var scaleY = canvas!.height / rect.height;
+        var newX = (annotation.x / scaleX) + rect.left - canvas!.offsetLeft;
+        var newY = (annotation.y / scaleY) + rect.top - canvas!.offsetTop;
+        annotation.input.style.left = newX * widthRatio + 'px';
+        annotation.input.style.top = newY * heightRatio + 'px';
+      });
+    }
+
+    // Redraw annotations when the window is resized
+    // window.addEventListener('resize',() => { redrawAnnotations(canvas!.width, canvas!.height)});
+  }
+
   magnifyCanvas() {
+    let tool = document.getElementById('tool');
+    this.removeMatButtonToggleChecked(tool);
+    this.onChangeTool("ZoomAndPan");
+
     let zoom = 3;
     var canvas = document.getElementById('layerGroup0-layer-0')?.querySelector('canvas');
     let glass: any;
@@ -286,6 +341,24 @@ export class DwvComponent implements OnInit {
   }
 
   /**
+   * Handle a change tool event.
+   * @param tool The new tool name.
+   */
+  onChangeActionTool = (tool: string) => {
+    if (this.dwvApp) {
+      this.disableMagnifier();
+      this.selectedTool = tool;
+      this.colours = false;
+      if (tool === 'undo') {
+        this.dwvApp.undo();
+      }
+      else {
+        this.dwvApp.redo();
+      }
+    }
+  }
+
+  /**
    * Check if a tool can be run.
    *
    * @param tool The tool name.
@@ -364,20 +437,112 @@ export class DwvComponent implements OnInit {
   private onChangeShape = (shape: string) => {
     if (this.dwvApp && (this.selectedTool === 'Ruler' || this.selectedTool === 'Circle' || this.selectedTool === 'Rectangle')) {
       this.dwvApp.setToolFeatures({ shapeName: shape });
+      var canvas = document.getElementById('layerGroup0-layer-1')?.querySelector('canvas');
+      if (canvas) {
+        canvas.addEventListener('click', () => {
+          const jsonData = JSON.parse(this.dwvApp.getJsonState());
+          const drawingDetailsKeys = Object.keys(jsonData.drawingsDetails);
+
+          drawingDetailsKeys.forEach(newEntryId => {
+            jsonData.drawings.children.forEach((element: any) => {
+              element.children.forEach((child: any) => {
+                if (child.attrs.id === newEntryId) {
+                  const drawingObject = child;
+
+                  if (drawingObject) {
+                    const rulerName = drawingObject.attrs.name.replace('-group', '');
+                    const rulerLength = drawingObject.children[0].children[0].attrs.text;
+
+                    const tableRow = document.createElement('tr');
+
+                    const textCell = document.createElement('td');
+                    textCell.textContent = rulerName + ": " + rulerLength;
+
+                    const showButtonCell = document.createElement('td');
+                    const showButton = document.createElement('button');
+                    showButton.textContent = 'Show';
+                    showButtonCell.appendChild(showButton);
+
+                    const hideButtonCell = document.createElement('td');
+                    const hideButton = document.createElement('button');
+                    hideButton.textContent = 'Hide';
+                    hideButtonCell.appendChild(hideButton);
+
+                    tableRow.appendChild(textCell);
+                    tableRow.appendChild(showButtonCell);
+                    tableRow.appendChild(hideButtonCell);
+
+                    const table = document.querySelector('#drawings-table');
+                    if (table) {
+                      table.appendChild(tableRow);
+
+                      const uniqueRows: any[] = [];
+                      const rowsToRemove: any[] = [];
+                      const rows = table.querySelectorAll('tr');
+
+                      rows.forEach((row, index) => {
+                        const rowHTML = row.innerHTML;
+
+                        if (uniqueRows.indexOf(rowHTML) === -1) {
+                          uniqueRows.push(rowHTML);
+                        } else {
+                          rowsToRemove.push(row);
+                        }
+                      });
+
+                      rowsToRemove.forEach(row => row.remove());
+                    } else {
+                      console.log("Drawings table element not found.");
+                    }
+
+                    showButton.addEventListener('click', () => {
+                      // Handle show functionality
+                    });
+
+                    hideButton.addEventListener('click', () => {
+                      // Handle hide functionality
+                    });
+                  }
+
+                }
+              });
+            });
+          });
+        });
+
+      }
     }
   }
+
+  removeMatButtonToggleChecked(element: HTMLElement | null) {
+    if (!element) return;
+
+    var children = element.children;
+    for (var i = 0; i < children.length; i++) {
+      var child = children[i] as HTMLElement;
+      if (child.classList.contains('mat-button-toggle-checked')) {
+        child.classList.remove('mat-button-toggle-checked');
+      }
+      this.removeMatButtonToggleChecked(child); // Recursively check children of children
+    }
+  }
+
 
   /**
    * Handle a reset event.
    */
   onReset = () => {
     if (this.dwvApp) {
-      this.disableMagnifier();
+      let buttonRow = document.getElementById('button-row');
+      this.removeMatButtonToggleChecked(buttonRow);
       this.dwvApp.resetDisplay();
+      this.onChangeTool("ZoomAndPan");
+      // let element = document.getElementById("layerGroup0-layer-1")?.querySelector('canvas')?.parentElement as HTMLDivElement;
+      // this.draw = new DrawLayer(element);
+      // console.log(this.draw)
 
     }
   }
-
   /**
    * Open the DICOM tags dialog.
    */

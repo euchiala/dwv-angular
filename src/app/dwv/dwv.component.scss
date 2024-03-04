@@ -40,10 +40,13 @@ a:hover {
   position: relative;
   padding: 0;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   height: 90%;
+  margin: 0 20px;
 }
-
+.example-form{
+  z-index: 999;
+}
 .layer {
   position: absolute;
   pointer-events: none;
