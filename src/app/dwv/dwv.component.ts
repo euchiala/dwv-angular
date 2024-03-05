@@ -33,7 +33,7 @@ export class DwvComponent implements OnInit {
   @ViewChild('magnifierCanvas', { static: true }) magnifierCanvasRef!: ElementRef<HTMLCanvasElement>;
 
   public versions: any;
-  public drawingObject: any;
+  public drawings: any[] = [];
   public tools = {
     Scroll: new ToolConfig(),
     ZoomAndPan: new ToolConfig(),
@@ -444,70 +444,15 @@ export class DwvComponent implements OnInit {
           const drawingDetailsKeys = Object.keys(jsonData.drawingsDetails);
 
           drawingDetailsKeys.forEach(newEntryId => {
-            jsonData.drawings.children.forEach((element: any) => {
+            jsonData.drawings.children.forEach((element: any, index: any) => {
               element.children.forEach((child: any) => {
                 if (child.attrs.id === newEntryId) {
-                  const drawingObject = child;
-
-                  if (drawingObject) {
-                    const rulerName = drawingObject.attrs.name.replace('-group', '');
-                    const rulerLength = drawingObject.children[0].children[0].attrs.text;
-
-                    const tableRow = document.createElement('tr');
-
-                    const textCell = document.createElement('td');
-                    textCell.textContent = rulerName + ": " + rulerLength;
-
-                    const showButtonCell = document.createElement('td');
-                    const showButton = document.createElement('button');
-                    showButton.textContent = 'Show';
-                    showButtonCell.appendChild(showButton);
-
-                    const hideButtonCell = document.createElement('td');
-                    const hideButton = document.createElement('button');
-                    hideButton.textContent = 'Hide';
-                    hideButtonCell.appendChild(hideButton);
-
-                    tableRow.appendChild(textCell);
-                    tableRow.appendChild(showButtonCell);
-                    tableRow.appendChild(hideButtonCell);
-
-                    const table = document.querySelector('#drawings-table');
-                    if (table) {
-                      table.appendChild(tableRow);
-
-                      const uniqueRows: any[] = [];
-                      const rowsToRemove: any[] = [];
-                      const rows = table.querySelectorAll('tr');
-
-                      rows.forEach((row, index) => {
-                        const rowHTML = row.innerHTML;
-
-                        if (uniqueRows.indexOf(rowHTML) === -1) {
-                          uniqueRows.push(rowHTML);
-                        } else {
-                          rowsToRemove.push(row);
-                        }
-                      });
-
-                      rowsToRemove.forEach(row => row.remove());
-                    } else {
-                      console.log("Drawings table element not found.");
-                    }
-
-                    showButton.addEventListener('click', () => {
-                      // Handle show functionality
-                    });
-
-                    hideButton.addEventListener('click', () => {
-                      // Handle hide functionality
-                    });
-                  }
-
+                  this.drawings.push(child)
                 }
               });
             });
           });
+          this.drawings = this.drawings.filter((value, index, array) => index == array.findIndex(item => item.attrs.id == value.attrs.id));
         });
 
       }

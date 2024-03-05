@@ -69,7 +69,20 @@
     <mat-tab-group>
       <mat-tab label="Drawings">
         <table id="drawings-table">
+          <tr *ngFor="let drawing of drawings">
+            <td>{{ drawing.attrs.name.replace('-group', '') }}: {{drawing.children[0].children[0].attrs.text}}</td>
+            <td>
+              <button class="btn btn-success" type="submit" style="background-color: #424242;border: none;">
+                <span class="btn-inner--icon"><i class="fa fa-eye" aria-hidden="true" style="color: #ffffff ;"></i></span>
+              </button>
+              <button class="btn btn-success" type="submit" style="background-color: #424242;border: none;">
+                <span class="btn-inner--icon"><i class="fa fa-eye-slash" aria-hidden="true"
+                    style="color: #ffffff ;"></i></span>
+              </button>
+            </td>
+          </tr>
         </table>
+
       </mat-tab>
       <mat-tab label="Comments"> Content 2 </mat-tab>
     </mat-tab-group>
