@@ -2390,9 +2390,9 @@
   version "5.1.4"
   resolved "https://registry.yarnpkg.com/@types/jasmine/-/jasmine-5.1.4.tgz#0de3f6ca753e10d1600ce1864ae42cfd47cf9924"
 
-"@types/jasminewd2@~2.0.12":
-  version "2.0.12"
-  resolved "https://registry.npmjs.org/@types/jasminewd2/-/jasminewd2-2.0.12.tgz"
+"@types/jasminewd2@~2.0.13":
+  version "2.0.13"
+  resolved "https://registry.yarnpkg.com/@types/jasminewd2/-/jasminewd2-2.0.13.tgz#0b60c1fcd06277ea97efbbad5a02e0c1a4a8996a"
   dependencies:
     "@types/jasmine" "*"
 
