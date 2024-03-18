@@ -148,6 +148,10 @@
   version "16.2.0"
   resolved "https://registry.npmjs.org/@angular-eslint/bundled-angular-compiler/-/bundled-angular-compiler-16.2.0.tgz"
 
+"@angular-eslint/bundled-angular-compiler@17.3.0":
+  version "17.3.0"
+  resolved "https://registry.yarnpkg.com/@angular-eslint/bundled-angular-compiler/-/bundled-angular-compiler-17.3.0.tgz#08b8b1bebbb677a1f208b56516fc9177a289d212"
+
 "@angular-eslint/eslint-plugin-template@16.2.0", "@angular-eslint/eslint-plugin-template@~16.2.0":
   version "16.2.0"
   resolved "https://registry.npmjs.org/@angular-eslint/eslint-plugin-template/-/eslint-plugin-template-16.2.0.tgz"
@@ -178,12 +182,12 @@
     strip-json-comments "3.1.1"
     tmp "0.2.1"
 
-"@angular-eslint/template-parser@~16.2.0":
-  version "16.2.0"
-  resolved "https://registry.npmjs.org/@angular-eslint/template-parser/-/template-parser-16.2.0.tgz"
+"@angular-eslint/template-parser@~17.3.0":
+  version "17.3.0"
+  resolved "https://registry.yarnpkg.com/@angular-eslint/template-parser/-/template-parser-17.3.0.tgz#580a703cbaa4967d36a953a00f5c347987c14171"
   dependencies:
-    "@angular-eslint/bundled-angular-compiler" "16.2.0"
-    eslint-scope "^7.0.0"
+    "@angular-eslint/bundled-angular-compiler" "17.3.0"
+    eslint-scope "^8.0.0"
 
 "@angular-eslint/utils@16.2.0":
   version "16.2.0"
@@ -3927,9 +3931,16 @@ eslint-scope@5.1.1, eslint-scope@^5.1.1:
     esrecurse "^4.3.0"
     estraverse "^4.1.1"
 
-eslint-scope@^7.0.0, eslint-scope@^7.2.2:
+eslint-scope@^7.2.2:
   version "7.2.2"
   resolved "https://registry.npmjs.org/eslint-scope/-/eslint-scope-7.2.2.tgz"
+  dependencies:
+    esrecurse "^4.3.0"
+    estraverse "^5.2.0"
+
+eslint-scope@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-scope/-/eslint-scope-8.0.0.tgz#7b6b067599c436404ce856cd2c47331464603a4a"
   dependencies:
     esrecurse "^4.3.0"
     estraverse "^5.2.0"
